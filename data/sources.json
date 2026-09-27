@@ -1,7 +1,10 @@
 [
   {
     "name": "OpenStax",
-    "url": "https://openstax.org/",
+    "url": "https://openstax.org/details/books/physics-2e",
+    "level": "Seconde",
+    "subject": "Physique",
+    "license_hint": "CC BY",
     "license": "Licence variable selon la ressource (notamment CC BY et CC BY-NC-SA)",
     "mode": "metadata",
     "enabled": true,
@@ -9,7 +12,10 @@
   },
   {
     "name": "PhET Interactive Simulations",
-    "url": "https://phet.colorado.edu/",
+    "url": "https://phet.colorado.edu/en/simulations/filter?subjects=physics&type=html",
+    "level": "Seconde",
+    "subject": "Physique",
+    "license_hint": "CC BY-NC",
     "license": "CC BY-NC 4.0 pour les simulations HTML actuelles",
     "mode": "link_only",
     "enabled": true,
@@ -17,7 +23,10 @@
   },
   {
     "name": "OER Commons",
-    "url": "https://oercommons.org/",
+    "url": "https://openstax.org/details/books/chemistry-2e",
+    "level": "Seconde",
+    "subject": "Chimie",
+    "license_hint": "CC BY",
     "license": "Variable selon chaque ressource",
     "mode": "metadata",
     "enabled": true,

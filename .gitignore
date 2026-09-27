@@ -6,3 +6,5 @@ librecours.db
 android/.gradle/
 android/build/
 android/app/build/
+
+data/courses.db

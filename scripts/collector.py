@@ -1,4 +1,4 @@
-import os, re, sqlite3, hashlib, time
+import os, re, sqlite3, hashlib, time, json
 from pathlib import Path
 from urllib.parse import urljoin, urlparse, quote_plus
 import requests
@@ -68,6 +68,16 @@ def init_db():
       source_url TEXT NOT NULL UNIQUE, author TEXT DEFAULT '', license TEXT NOT NULL,
       file_name TEXT, status TEXT NOT NULL DEFAULT 'pending',
       created_at TEXT DEFAULT CURRENT_TIMESTAMP)""")
+    for statement in (
+        "ALTER TABLE courses ADD COLUMN ai_score INTEGER DEFAULT 0",
+        "ALTER TABLE courses ADD COLUMN ai_decision TEXT DEFAULT 'review'",
+        "ALTER TABLE courses ADD COLUMN ai_reason TEXT DEFAULT ''",
+        "ALTER TABLE courses ADD COLUMN ai_checked_at TEXT DEFAULT ''",
+    ):
+        try:
+            conn.execute(statement)
+        except sqlite3.OperationalError:
+            pass
     conn.commit()
     return conn
 
@@ -126,16 +136,16 @@ def maybe_download_pdf(pdf_url, lic):
         print("PDF skipped:", pdf_url, exc)
         return None
 
-def crawl_page(conn, url, source_name, forced_level=None, forced_subject=None):
+def crawl_page(conn, url, source_name, forced_level=None, forced_subject=None, license_hint=None):
     try:
         soup, title, author, lic = page_metadata(url)
     except Exception as exc:
         print("Page skipped:", url, exc)
         return 0
 
+    lic = lic or license_hint
     if not lic:
         return 0
-
     level = forced_level or classify_level(title + " " + soup.get_text(" ", strip=True)[:6000])
     subject = forced_subject or classify_subject(title + " " + soup.get_text(" ", strip=True)[:6000])
     count = 0
@@ -181,12 +191,31 @@ def google_discovery(conn, query, source_name):
 def main():
     conn = init_db()
     total = 0
-    for level in LEVELS:
-        for subject in SUBJECTS:
-            query = f'"{level}" "{subject}" (cours OR course) (Creative Commons OR "CC BY" OR OER)'
-            print("Recherche:", query)
-            total += google_discovery(conn, query, "Web discovery")
-            time.sleep(0.5)
+    # Priorité aux sources explicitement configurées : plus fiable que Google
+    # et compatible avec les restrictions des hébergeurs gratuits.
+    registry = BASE / "data" / "sources.json"
+    try:
+        sources = json.loads(registry.read_text(encoding="utf-8"))
+    except Exception as exc:
+        print("Registre de sources illisible:", exc)
+        sources = []
+    for source in sources:
+        if not source.get("enabled", True) or not source.get("url"):
+            continue
+        print("Source configurée:", source["name"])
+        try:
+            total += crawl_page(conn, source["url"], source["name"], source.get("level"), source.get("subject"), source.get("license_hint"))
+        except Exception as exc:
+            print("Source ignorée:", source["url"], exc)
+        time.sleep(0.5)
+    # Complément de découverte, désactivable sur Render si le moteur bloque les robots.
+    if os.getenv("ENABLE_GOOGLE_DISCOVERY", "0") == "1":
+        for level in LEVELS:
+            for subject in SUBJECTS:
+                query = f'"{level}" "{subject}" (cours OR course) (Creative Commons OR "CC BY" OR OER)'
+                print("Recherche:", query)
+                total += google_discovery(conn, query, "Web discovery")
+                time.sleep(0.5)
     conn.close()
     print("Collecte terminée. Nouvelles entrées:", total)
 
