@@ -8,6 +8,7 @@ import time
 from pathlib import Path
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, abort, session
 from dotenv import load_dotenv
+from scripts.license_verifier import verify_license
 
 load_dotenv()
 BASE = Path(__file__).resolve().parent
@@ -41,6 +42,16 @@ def init_db():
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
     """)
+    for statement in (
+        "ALTER TABLE courses ADD COLUMN ai_score INTEGER DEFAULT 0",
+        "ALTER TABLE courses ADD COLUMN ai_decision TEXT DEFAULT 'review'",
+        "ALTER TABLE courses ADD COLUMN ai_reason TEXT DEFAULT ''",
+        "ALTER TABLE courses ADD COLUMN ai_checked_at TEXT DEFAULT ''",
+    ):
+        try:
+            conn.execute(statement)
+        except sqlite3.OperationalError:
+            pass
     conn.commit()
     conn.close()
 
@@ -132,6 +143,18 @@ def sources_page():
     import json
     sources = json.loads((BASE / "data" / "sources.json").read_text(encoding="utf-8"))
     return render_template("sources.html", sources=sources)
+
+@app.route("/admin/verify/<int:course_id>", methods=["POST"])
+def admin_verify(course_id):
+    if not admin_required(): return redirect(url_for("admin_login"))
+    conn = db()
+    item = conn.execute("SELECT * FROM courses WHERE id=?", (course_id,)).fetchone()
+    if item:
+        result = verify_license(item["title"], item["license"], item["source_url"], item["description"])
+        conn.execute("UPDATE courses SET ai_score=?, ai_decision=?, ai_reason=?, ai_checked_at=CURRENT_TIMESTAMP WHERE id=?", (result["score"], result["decision"], result["reason"], course_id))
+        conn.commit()
+    conn.close()
+    return redirect(url_for("admin"))
 
 @app.route("/admin")
 def admin():

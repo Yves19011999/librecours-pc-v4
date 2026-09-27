@@ -3,6 +3,7 @@ from pathlib import Path
 from urllib.parse import urljoin, urlparse, quote_plus
 import requests
 from bs4 import BeautifulSoup
+from license_verifier import verify_license
 
 BASE = Path(__file__).resolve().parents[1]
 DB = BASE / "data" / "courses.db"
@@ -87,10 +88,11 @@ def page_metadata(url):
 
 def save(conn, title, level, subject, source, lic, author="", file_name=None, status="pending"):
     try:
+        result = verify_license(title, lic, source)
         conn.execute("""INSERT INTO courses
-        (title,level,subject,source_url,author,license,file_name,status)
-        VALUES (?,?,?,?,?,?,?,?)""",
-        (title[:250], level, subject, source, author[:250], lic, file_name, status))
+        (title,level,subject,source_url,author,license,file_name,status,ai_score,ai_decision,ai_reason,ai_checked_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)""",
+        (title[:250], level, subject, source, author[:250], lic, file_name, status, result["score"], result["decision"], result["reason"]))
         conn.commit()
         return True
     except sqlite3.IntegrityError:
