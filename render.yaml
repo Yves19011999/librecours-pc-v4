@@ -10,3 +10,7 @@ services:
         sync: false
       - key: SECRET_KEY
         generateValue: true
+      - key: ENABLE_AUTO_COLLECT
+        value: "1"
+      - key: COLLECT_INTERVAL_SECONDS
+        value: "86400"

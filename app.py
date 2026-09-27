@@ -1,4 +1,10 @@
-import os, sqlite3, secrets
+import os
+import sqlite3
+import secrets
+import sys
+import subprocess
+import threading
+import time
 from pathlib import Path
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, abort, session
 from dotenv import load_dotenv
@@ -41,6 +47,18 @@ def init_db():
 # Gunicorn importe ce module sans exécuter le bloc __main__.
 # L’initialisation doit donc avoir lieu à l’import pour Render.
 init_db()
+
+def _auto_collect_loop():
+    interval = int(os.getenv("COLLECT_INTERVAL_SECONDS", "86400"))
+    while True:
+        try:
+            subprocess.run([sys.executable, str(BASE / "scripts" / "collector.py")], timeout=max(300, interval - 60), check=False)
+        except Exception as exc:
+            print("Collecte automatique interrompue:", exc)
+        time.sleep(interval)
+
+if os.getenv("ENABLE_AUTO_COLLECT", "0") == "1":
+    threading.Thread(target=_auto_collect_loop, name="librecours-collector", daemon=True).start()
 
 @app.route("/")
 def index():
