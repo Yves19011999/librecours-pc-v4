@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% block content %}
+<div class="admin-head"><h1>Administration</h1><a href="{{url_for('admin_logout')}}">Déconnexion</a></div>
+<h2>Ajouter manuellement</h2><form class="adminform" method="post" action="{{url_for('admin_add')}}">
+<input required name="title" placeholder="Titre"><input required name="level" placeholder="Niveau"><input required name="subject" placeholder="Physique ou Chimie"><input name="chapter" placeholder="Chapitre"><input required name="source_url" placeholder="URL de la source"><input required name="license" placeholder="Licence (ex. CC BY 4.0)"><input name="author" placeholder="Auteur"><textarea name="description" placeholder="Description"></textarea><button>Publier</button></form>
+<h2>En attente de validation</h2>{% for c in pending %}<div class="row"><div><b>{{c.title}}</b><br><small>{{c.level}} · {{c.subject}} · {{c.license}}</small></div><div><form method="post" action="{{url_for('admin_action',course_id=c.id,action='publish')}}"><button>Publier</button></form><form method="post" action="{{url_for('admin_action',course_id=c.id,action='reject')}}"><button class="danger">Refuser</button></form></div></div>{% else %}<p>Rien en attente.</p>{% endfor %}
+<h2>Publiés</h2>{% for c in published %}<div class="row"><span>{{c.title}}</span><small>{{c.license}}</small></div>{% endfor %}{% endblock %}

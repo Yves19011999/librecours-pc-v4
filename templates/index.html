@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block content %}
+<section class="hero"><h1>Les cours de Physique-Chimie, gratuitement.</h1>
+<p>Une bibliothèque classée par niveau, avec des ressources réutilisables et leur licence.</p>
+<form class="search"><input id="searchBox" name="q" value="{{ q }}" placeholder="Rechercher un cours, chapitre…" autocomplete="off"><select name="level"><option value="">Tous les niveaux</option>{% for x in levels %}<option {% if x==level %}selected{% endif %}>{{x}}</option>{% endfor %}</select><select name="subject"><option value="">Physique + Chimie</option><option {% if subject=='Physique' %}selected{% endif %}>Physique</option><option {% if subject=='Chimie' %}selected{% endif %}>Chimie</option></select><button>Rechercher</button></form></section>
+<div class="grid">{% for c in courses %}<article class="card"><span class="pill">{{c.level}}</span><span class="pill">{{c.subject}}</span><h2>{{c.title}}</h2><small>Licence : {{c.license}}</small><a class="btn" href="{{url_for('course',course_id=c.id)}}">Voir le cours →</a></article>{% else %}<div class="empty">Aucun cours publié.</div>{% endfor %}</div>{% endblock %}
+
+<script>
+const box=document.getElementById('searchBox');
+if(box){
+ box.addEventListener('input', async ()=>{
+   const q=box.value.trim();
+   if(q.length<2) return;
+   try{
+     const r=await fetch('/api/search?q='+encodeURIComponent(q));
+     const d=await r.json();
+     // Suggestions can be added here without changing the server-side search.
+     console.debug(d.results);
+   }catch(e){}
+ });
+}
+</script>

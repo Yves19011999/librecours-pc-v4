@@ -1,0 +1,26 @@
+[
+  {
+    "name": "OpenStax",
+    "url": "https://openstax.org/",
+    "license": "Licence variable selon la ressource (notamment CC BY et CC BY-NC-SA)",
+    "mode": "metadata",
+    "enabled": true,
+    "note": "Vérifier la licence précise du livre/élément avant redistribution."
+  },
+  {
+    "name": "PhET Interactive Simulations",
+    "url": "https://phet.colorado.edu/",
+    "license": "CC BY-NC 4.0 pour les simulations HTML actuelles",
+    "mode": "link_only",
+    "enabled": true,
+    "note": "Redistribution gratuite autorisée pour les usages non commerciaux avec attribution."
+  },
+  {
+    "name": "OER Commons",
+    "url": "https://oercommons.org/",
+    "license": "Variable selon chaque ressource",
+    "mode": "metadata",
+    "enabled": true,
+    "note": "La licence doit être vérifiée ressource par ressource."
+  }
+]

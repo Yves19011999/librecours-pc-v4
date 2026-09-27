@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% block content %}
+<section class="hero"><h1>Sources et licences</h1>
+<p>LibreCours PC privilégie les ressources dont les conditions de réutilisation sont explicites.</p></section>
+<div class="grid">{% for s in sources %}<article class="card"><h2>{{s.name}}</h2><p>{{s.license}}</p>
+<a class="btn" href="{{s.url}}" target="_blank" rel="noopener">Visiter la source →</a>
+<p><small>{{s.note}}</small></p></article>{% endfor %}</div>{% endblock %}

@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+librecours.db
+android/.gradle/
+android/build/
+android/app/build/

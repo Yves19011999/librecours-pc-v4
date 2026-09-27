@@ -1,0 +1,4 @@
+{% extends "base.html" %}{% block title %}{{course.title}} — LibreCours PC{% endblock %}{% block content %}
+<article class="course"><div><span class="pill">{{course.level}}</span> <span class="pill">{{course.subject}}</span></div><h1>{{course.title}}</h1><p>{{course.description}}</p>
+<div class="info"><b>Licence</b><span>{{course.license}}</span><b>Source</b><a href="{{course.source_url}}" target="_blank" rel="noopener">Consulter la source</a>{% if course.author %}<b>Auteur</b><span>{{course.author}}</span>{% endif %}</div>
+{% if course.file_name %}<a class="download" href="{{url_for('download',course_id=course.id)}}">📥 Télécharger gratuitement</a>{% else %}<a class="download secondary" href="{{course.source_url}}" target="_blank" rel="noopener">🌐 Ouvrir la ressource originale</a>{% endif %}</article>{% endblock %}
