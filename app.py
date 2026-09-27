@@ -38,6 +38,10 @@ def init_db():
     conn.commit()
     conn.close()
 
+# Gunicorn importe ce module sans exécuter le bloc __main__.
+# L’initialisation doit donc avoir lieu à l’import pour Render.
+init_db()
+
 @app.route("/")
 def index():
     q = request.args.get("q", "").strip()
